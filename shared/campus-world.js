@@ -291,7 +291,8 @@ export function build(scene, renderer, {night = false, onProgress = () => {}} = 
     for(let y=.15;y<1.1;y+=.24)beam([124,y,z+dir*1.1],[128,y,z+dir*1.1],.011,m.line,.011,4);
     box(126,.086,z-dir*1.25,6.3,.015,.06,m.line);for(const x of [122.85,129.15])box(x,.086,z-dir*.625,.06,.015,1.25,m.line);
   }
-  for(const p of tr.checkpoints)ellipse(p.x,p.z,.40,.40,m.line,.084);
+  // The painted checkpoint discs belong to the night run; the daytime tour has no checkpoints.
+  if(night)for(const p of tr.checkpoints)ellipse(p.x,p.z,.40,.40,m.line,.084);
   for(const [i,p] of tr.checkpoints.entries()){
     const group=new THREE.Group();group.position.set(p.x,1.65,p.z);group.name='Track checkpoint '+(i+1);root.add(group);
     const mat=new THREE.MeshBasicMaterial({color:0x66c5f1,transparent:true,opacity:.72});
@@ -373,7 +374,7 @@ export function build(scene, renderer, {night = false, onProgress = () => {}} = 
   return {root,colliders,bounds:copy(CAMPUS.bounds),stations:copy(CAMPUS.stations),safeZones:copy(CAMPUS.safeZones),spawn:copy(CAMPUS.spawn),exit:copy(CAMPUS.exit),diagnostics,
     groundHeight(){return 0;},isWalkable(x,z,r=.6){const b=CAMPUS.bounds;return x>b.minX+r&&x<b.maxX-r&&z>b.minZ+r&&z<b.maxZ-r&&!blocked(x,z,r);},
     update(dt,time,state){animatedTime.value=time;for(const item of memories.values()){item.group.position.y=1.65+Math.sin(time*1.6)*.07;item.group.rotation.y=time*.35;item.group.scale.setScalar(item.done?.46:1);item.ring.rotation.z=time*.18;}
-      for(const beacon of trackBeacons){const tr=state?.track,complete=tr?.done||tr?.active&&beacon.index<tr.next,next=tr?.active&&beacon.index===tr.next;beacon.group.visible=!night||!!tr?.active||!!tr?.done;beacon.mat.color.set(complete?0xd8ac69:next?0xa2ebff:0x458bab);beacon.mat.opacity=complete?.35:next?.96:.45;beacon.halo.scale.setScalar(next?1+Math.sin(time*3)*.12:1);if(state?.player)beacon.group.rotation.y=Math.atan2(state.player.x-beacon.group.position.x,state.player.z-beacon.group.position.z);}
+      for(const beacon of trackBeacons){const tr=state?.track,complete=tr?.done||tr?.active&&beacon.index<tr.next,next=tr?.active&&beacon.index===tr.next;beacon.group.visible=night&&(!!tr?.active||!!tr?.done);beacon.mat.color.set(complete?0xd8ac69:next?0xa2ebff:0x458bab);beacon.mat.opacity=complete?.35:next?.96:.45;beacon.halo.scale.setScalar(next?1+Math.sin(time*3)*.12:1);if(state?.player)beacon.group.rotation.y=Math.atan2(state.player.x-beacon.group.position.x,state.player.z-beacon.group.position.z);}
       for(const {mesh:flag,original} of flags){const p=flag.geometry.attributes.position;for(let i=0;i<p.count;i++){const x=original[i*3],y=original[i*3+1],u=(x+1.15)/2.3;p.setZ(i,Math.sin(u*5-time*1.7+y)*.17*u);}p.needsUpdate=true;flag.geometry.computeVertexNormals();}},
     setMemory(id,done){const item=memories.get(id);if(!item)return;item.done=!!done;item.mat.color.set(done?0xf1ce92:0xb4e7df);},
   };
