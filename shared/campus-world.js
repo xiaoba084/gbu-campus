@@ -291,7 +291,8 @@ export function build(scene, renderer, {night = false, onProgress = () => {}} = 
     for(let y=.15;y<1.1;y+=.24)beam([124,y,z+dir*1.1],[128,y,z+dir*1.1],.011,m.line,.011,4);
     box(126,.086,z-dir*1.25,6.3,.015,.06,m.line);for(const x of [122.85,129.15])box(x,.086,z-dir*.625,.06,.015,1.25,m.line);
   }
-  for(const p of tr.checkpoints)ellipse(p.x,p.z,.40,.40,m.line,.084);
+  // The painted checkpoint discs belong to the night run; the daytime tour has no checkpoints.
+  if(night)for(const p of tr.checkpoints)ellipse(p.x,p.z,.40,.40,m.line,.084);
   for(const [i,p] of tr.checkpoints.entries()){
     const group=new THREE.Group();group.position.set(p.x,1.65,p.z);group.name='Track checkpoint '+(i+1);root.add(group);
     const mat=new THREE.MeshBasicMaterial({color:0x66c5f1,transparent:true,opacity:.72});
